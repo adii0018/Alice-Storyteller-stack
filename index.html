@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Alice Storyteller 📚</title>
+    <style>
+        :root {
+            /* Color Palette - Cultural & Modern */
+            --primary-color: #8B4513; /* Saddle Brown / Earthy */
+            --primary-hover: #A0522D;
+            --accent-color: #DAA520; /* Goldenrod */
+            --bg-color: #FDFBF7; /* Old Paper / Cream */
+            --card-bg: #FFFFFF;
+            --text-main: #2C3E50;
+            --text-light: #636e72;
+            --border-color: #e0e0e0;
+            --success-color: #27ae60;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius: 12px;
+            
+            /* Typography */
+            --font-ui: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --font-story: 'Georgia', 'Times New Roman', serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-ui);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header --- */
+        header {
+            background: #fff;
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo span {
+            color: var(--accent-color);
+        }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 350px 1fr; /* Sidebar | Content */
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        @media (max-width: 900px) {
+            main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* --- Sidebar / Controls --- */
+        aside.controls {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            height: fit-content;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: var(--text-main);
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: #fafafa;
+            transition: all 0.2s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(139, 69, 19, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 0.85rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #fff;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        
+        .btn-secondary:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+        }
+
+        /* --- Story Display Area --- */
+        section.stage {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            border: 2px dashed var(--border-color);
+            color: var(--text-light);
+        }
+
+        .story-card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .story-visual {
+            width: 100%;
+            height: 350px;
+            background-color: #eee;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .story-visual img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+
+        .story-visual:hover img {
+            transform: scale(1.02);
+        }
+
+        .visual-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            padding: 1.5rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .story-meta {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-color);
+        }
+
+        .story-title-display {
+            font-family: var(--font-ui);
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0;
+            color: white;
+        }
+
+        .story-content {
+            padding: 2rem;
+        }
+
+        .editable-area {
+            width: 100%;
+            min-height: 300px;
+            padding: 1.5rem;
+            border: 1px solid transparent;
+            background: #fdfdfd;
+            font-family: var(--font-story);
+            font-size: 1.15rem;
+            color: #333;
+            line-height: 1.8;
+            resize: vertical;
+            border-radius: 8px;
+        }
+
+        .editable-area:focus {
+            outline: none;
+            background: #fff;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(218, 165, 32, 0.1);
+        }
+
+        /* --- Action Toolbar --- */
+        .toolbar {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            padding: 1rem 2rem;
+            background: #f8f9fa;
+            border-top: 1px solid var(--border-color);
+            align-items: center;
+        }
+
+        .tool-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .tool-btn:hover {
+            background: #f0f0f0;
+            border-color: #bbb;
+        }
+
+        .tool-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .tool-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* --- Toast Notification --- */
+        #toast-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .toast {
+            background: #333;
+            color: #fff;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 0.9rem;
+            animation: slideIn 0.3s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* --- Loading Spinner --- */
+        .loader-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 1rem;
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* --- Footer --- */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--border-color);
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            🌿 Alice <span>Storyteller</span>
+        </div>
+        <nav>
+            <!-- Simple GitHub/About link placeholder -->
+            <a href="#" style="color: var(--text-main); text-decoration: none; font-size: 0.9rem;">About Project</a>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Sidebar Controls -->
+        <aside class="controls">
+            <h2>Story Configuration</h2>
+            <form id="storyForm">
+                <div class="form-group">
+                    <label for="culture">Cultural Background</label>
+                    <select id="culture">
+                        <option value="indian">Indian 🇮🇳</option>
+                        <option value="african">African 🌍</option>
+                        <option value="european">European 🏰</option>
+                        <option value="native_american">Native American 🦅</option>
+                        <option value="east_asian">East Asian 🏯</option>
+                        <option value="middle_eastern">Middle Eastern 🕌</option>
+                        <option value="latin_american">Latin American 🌎</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="storyType">Story Type</label>
+                    <select id="storyType">
+                        <option value="folk_tale">Folk Tale</option>
+                        <option value="myth">Myth & Legend</option>
+                        <option value="moral">Moral Story</option>
+                        <option value="historical">Historical Fiction</option>
+                        <option value="fable">Animal Fable</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="language">Narration Language</label>
+                    <select id="language">
+                        <option value="en-US">English</option>
+                        <option value="hi-IN">Hindi (हिंदी)</option>
+                        <option value="es-ES">Spanish (Español)</option>
+                        <option value="fr-FR">French (Français)</option>
+                        <option value="ja-JP">Japanese (日本語)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="artStyle">Visual Art Style</label>
+                    <select id="artStyle">
+                        <option value="watercolor">Watercolor Painting</option>
+                        <option value="digital">Digital Art</option>
+                        <option value="oil">Oil Painting</option>
+                        <option value="pencil">Pencil Sketch</option>
+                        <option value="minimalist">Minimalist Vector</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="customPrompt">Specific Topic (Optional)</label>
+                    <input type="text" id="customPrompt" placeholder="e.g., The Jungle Tiger, Wise Owl...">
+                </div>
+
+                <button type="submit" class="btn-primary">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Generate Story
+                </button>
+            </form>
+            
+            <div style="margin-top: 2rem; padding: 1rem; background: #fdf2e9; border-radius: 8px; font-size: 0.85rem; color: #8d4004;">
+                <strong>💡 Suggestion:</strong> <span id="suggestionText">Try generating a Folk Tale from the Indian culture!</span>
+            </div>
+        </aside>
+
+        <!-- Main Stage / Display -->
+        <section class="stage" id="stage">
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="empty-state">
+                <svg width="64" height="64" fill="none" stroke="#ccc" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom: 1rem;"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                <h3>Ready to Tell a Story?</h3>
+                <p>Select your preferences on the left and click "Generate Story" to begin your cultural journey.</p>
+            </div>
+
+            <!-- Story Card -->
+            <article id="storyCard" class="story-card">
+                <div class="story-visual">
+                    <div class="loader-overlay" id="imgLoader">
+                        <div class="spinner"></div>
+                        <div class="loading-text">Painting Scene...</div>
+                    </div>
+                    <img id="storyImage" src="" alt="Story Scene">
+                    <div class="visual-overlay">
+                        <div>
+                            <div class="story-meta" id="metaDisplay">Indian Folk Tale</div>
+                            <h1 class="story-title-display" id="titleDisplay">Title Here</h1>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="story-content">
+                    <textarea id="storyText" class="editable-area" spellcheck="false"></textarea>
+                </div>
+
+                <div class="toolbar">
+                    <button class="tool-btn" id="btnAudio">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                        <span id="audioBtnText">Play Narration</span>
+                    </button>
+                    
+                    <button class="tool-btn" id="btnRegenImg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        New Image
+                    </button>
+
+                    <div style="flex-grow: 1;"></div> <!-- Spacer -->
+
+                    <button class="tool-btn" id="btnSave">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                        Save File
+                    </button>
+                    <button class="tool-btn" id="btnCopy">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        Copy
+                    </button>
+                </div>
+            </article>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025  Alice Smart Cultural Storyteller. Built for educational and cultural preservation by Aditya singh rajput 🧿</p>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script>
+        /**
+         * Smart Cultural Storyteller - Logic
+         * Handles mock AI generation, Web Speech API, and UI interactions.
+         */
+
+        // --- Mock Database of Stories ---
+        // In a real app, this would be an API call to OpenAI/LLM.
+        const storyDatabase = {
+            "indian": {
+                "folk_tale": [
+                    { title: "The Monkey and the Crocodile", content: "Once, a clever monkey lived on a delicious Jamun tree by a river. A crocodile became friends with him, eating the sweet fruits the monkey threw down. One day, the crocodile's wife demanded the monkey's heart. Reluctantly, the crocodile invited the monkey for dinner. Realizing the plot halfway across the river, the monkey calmly said, 'Oh dear, I left my heart safely stored in the tree trunk!' The foolish crocodile swam back, and the monkey escaped, teaching us that quick wit saves lives." },
+                    { title: "The Blue Jackal", content: "A jackal fell into a vat of blue dye and emerged with bright blue fur. When he returned to the forest, the animals, terrified by this strange creature, bowed down to him, thinking he was a divine king. He ruled the jungle for days, until one night other jackals began howling. Overcome by the instinct, the Blue King howled back, revealing his true voice. The animals chased him away, proving that you can't change your nature, only your appearance." }
+                ],
+                "moral": [
+                    { title: "The Salt Vendor and the Donkey", content: "A salt vendor loaded his donkey with bags of salt to take to the market. On the way, they crossed a stream. The donkey slipped and fell, causing the salt to dissolve, lightening his load. The next day, the donkey purposely fell in the water. The vendor realized the trick and the next day loaded the donkey with cotton. When the donkey fell again, the cotton absorbed water and became heavy. The donkey learned the hard way that laziness often leads to heavier burdens." }
+                ],
+                "myth": [
+                    { title: "The Churning of the Ocean", content: "The Gods and Demons decided to churn the Ocean of Milk to obtain the nectar of immortality. They used Mount Mandara as the churning rod and the serpent Vasuki as the rope. As they churned, deadly halahala poison emerged, threatening the universe. Lord Shiva swallowed the poison to save the world, holding it in his throat, which turned blue. Finally, the nectar appeared, and the Gods attained it, symbolizing the triumph of good over evil through sacrifice." }
+                ]
+            },
+            "african": {
+                "folk_tale": [
+                    { title: "Anansi the Spider and the Pot of Wisdom", content: "Anansi the Spider wanted to be the wisest being in the world. He gathered all the wisdom he could find and put it in a clay pot. He tried to climb a tree to hide the pot on top, but the pot was too big to hold while climbing. His young son suggested, 'Why not tie the pot behind you?' Anansi realized he didn't have all the wisdom after all. In anger, he threw the pot down, and it shattered, scattering wisdom to all the people of the world." }
+                ],
+                "fable": [
+                    { title: "The Lion and the Mouse", content: "A mighty lion was sleeping when a little mouse started running up and down his body. The lion woke up, angry, and was about to eat the mouse. The mouse pleaded, 'Let me go, and one day I will repay you.' The lion laughed but let him go. Later, the lion was caught in a hunter's net. The mouse heard his roar and gnawed through the ropes, setting the king free. No act of kindness is ever wasted." }
+                ]
+            },
+            "native_american": {
+                "folk_tale": [
+                    { title: "How the Bear Lost His Tail", content: "Long ago, Bear had a long, handsome tail. Fox was jealous of it. One winter, Fox told Bear that fish were caught by dipping tails into a hole in the ice. Bear tried this, waiting patiently. His tail froze into the ice. When he tried to leave, he pulled hard, and his tail snapped off, leaving only the small stump bears have today. Bear was humbled, and Fox was never fully trusted again." }
+                ],
+                "moral": [
+                    { title: "The Two Wolves", content: "An old grandfather was teaching his grandson about life. 'A fight is going on inside me,' he said. 'It is a terrible fight between two wolves. One is evil—he is anger, envy, sorrow, regret. The other is good—he is joy, peace, love, hope.' The grandson thought and asked, 'Which wolf will win?' The grandfather simply replied, 'The one you feed.'" }
+                ]
+            },
+            "european": {
+                "folk_tale": [
+                    { title: "The Pied Piper of Hamelin", content: "The town of Hamelin was overrun with rats. A piper appeared, dressed in multicolored clothing, and promised to rid the town of the pests for a fee. He played his flute, and the rats followed him into the river, where they drowned. But the mayor refused to pay. In revenge, the Piper returned and played a different tune, luring the children of the town away into a mountain, never to be seen again. A promise broken is a debt paid in sorrow." }
+                ]
+            },
+            "east_asian": {
+                "folk_tale": [
+                    { title: "The Story of the Stonecutter", content: "A stonecutter was unhappy with his simple life. He wished to be rich, then a governor, then the sun, then a cloud, then a mountain. As a mountain, he felt strong until a stonecutter began to chip away at him. Realizing the power of the stonecutter, he wished to be himself again. The story teaches that we should appreciate who we are, for there is always someone or something 'stronger' or different." }
+                ]
+            },
+            "middle_eastern": {
+                "folk_tale": [
+                    { title: "The Wise Judge", content: "Two men came to a judge, both claiming to own a particular camel. The judge blindfolded the camel and asked each man to identify which ear was injured. One man said the left, the other the right. The judge revealed the camel had no injuries. Then he asked the men to call the camel. The owner used a specific pet name, and the animal came to him. Truth is often found in the details only an owner knows." }
+                ]
+            },
+            "latin_american": {
+                "folk_tale": [
+                    { title: "The Hummingbird and the Fire", content: "One day, a great fire broke out in the forest. All the animals ran away in terror. But a small hummingbird flew to the river, picked up a single drop of water in its beak, and flew back to drop it on the fire. It did this again and again. The animals laughed, 'What are you doing? You can't stop the fire!' The hummingbird replied, 'I am doing what I can.'" }
+                ]
+            }
+        };
+
+        const defaultStories = {
+            "folk_tale": "Once upon a time in a distant land, there lived a humble community known for their unique traditions. They believed that every mountain had a spirit and every river told a story. One day, a traveler came to their village, seeking shelter. The villagers welcomed him with open arms, sharing their food and tales. In return, the traveler shared stories of the outside world, bridging the gap between the known and the unknown.",
+            "myth": "In the beginning, the world was shrouded in darkness. The Great Spirit looked upon the void and decided to bring light. With a wave of his hand, he created the sun to rule the day and the moon to guard the night. He scattered stars to guide the travelers. But he also created the wind, to remind the world that change is the only constant.",
+            "moral": "There was once a farmer who had a beautiful horse. His neighbors said, 'You are so lucky.' The farmer replied, 'We shall see.' One day the horse ran away. The neighbors said, 'What bad luck.' The farmer replied, 'We shall see.' Later, the horse returned with three wild horses. The neighbors said, 'You are so lucky.' The farmer simply smiled and said, 'We shall see.'",
+            "historical": "In the era of great kingdoms, a young scribe dedicated his life to recording the history of his people. He traveled from city to city, listening to elders and warriors. He realized that history was not just about battles and kings, but about the daily lives of ordinary people. His scrolls became the most treasured possession of the royal library, preserving the culture for eternity.",
+            "fable": "The Tortoise and the Hare is a story about patience and consistency. While the Hare was fast and boastful, he was also arrogant. The Tortoise was slow but steady. In the race, the Hare took a nap, underestimating his opponent. The Tortoise kept moving, step by step, until he crossed the finish line first. Slow and steady wins the race."
+        };
+
+        // --- Application State ---
+        const state = {
+            isPlaying: false,
+            utterance: null,
+            culture: 'indian',
+            storyType: 'folk_tale'
+        };
+
+        // --- DOM Elements ---
+        const els = {
+            form: document.getElementById('storyForm'),
+            emptyState: document.getElementById('emptyState'),
+            storyCard: document.getElementById('storyCard'),
+            culture: document.getElementById('culture'),
+            storyType: document.getElementById('storyType'),
+            language: document.getElementById('language'),
+            artStyle: document.getElementById('artStyle'),
+            customPrompt: document.getElementById('customPrompt'),
+            metaDisplay: document.getElementById('metaDisplay'),
+            titleDisplay: document.getElementById('titleDisplay'),
+            storyText: document.getElementById('storyText'),
+            storyImage: document.getElementById('storyImage'),
+            btnAudio: document.getElementById('btnAudio'),
+            audioBtnText: document.getElementById('audioBtnText'),
+            btnRegenImg: document.getElementById('btnRegenImg'),
+            btnSave: document.getElementById('btnSave'),
+            btnCopy: document.getElementById('btnCopy'),
+            imgLoader: document.getElementById('imgLoader'),
+            suggestionText: document.getElementById('suggestionText')
+        };
+
+        // --- Event Listeners ---
+
+        // 1. Form Submission (Generate Story)
+        els.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            generateStory();
+        });
+
+        // 2. Culture Change (Update Suggestions)
+        els.culture.addEventListener('change', updateSuggestions);
+
+        // 3. Audio Playback
+        els.btnAudio.addEventListener('click', toggleAudio);
+
+        // 4. Regenerate Image
+        els.btnRegenImg.addEventListener('click', () => {
+            generateImage(true);
+        });
+
+        // 5. Save to File
+        els.btnSave.addEventListener('click', saveStory);
+
+        // 6. Copy to Clipboard
+        els.btnCopy.addEventListener('click', copyStory);
+
+        // --- Core Functions ---
+
+        function updateSuggestions() {
+            const cultures = {
+                "indian": "Try a Myth about the Ganges river!",
+                "african": "How about a Fable about the Tortoise?",
+                "european": "Generate a Fairy Tale from the Celtic lands.",
+                "native_american": "Explore a legend about the Creation of Fire.",
+                "east_asian": "Read a story about the Zodiac animals.",
+                "middle_eastern": "Discover tales from the Arabian Nights.",
+                "latin_american": "Try a story about the Amazon rainforest."
+            };
+            els.suggestionText.textContent = cultures[els.culture.value];
+        }
+
+        function generateStory() {
+            // UI Feedback
+            showToast("AI is crafting your story...", "info");
+            
+            // Simulate API Delay
+            setTimeout(() => {
+                // Logic to pick a story
+                const culture = els.culture.value;
+                const type = els.storyType.value;
+                const prompt = els.customPrompt.value.trim();
+
+                let selectedStory = null;
+
+                // Try to find specific story in DB
+                if (storyDatabase[culture] && storyDatabase[culture][type]) {
+                    const stories = storyDatabase[culture][type];
+                    selectedStory = stories[Math.floor(Math.random() * stories.length)];
+                } else {
+                    // Fallback to generic if specific combo not in mock DB
+                    selectedStory = {
+                        title: `A Tale of ${els.culture.options[els.culture.selectedIndex].text.split(' ')[0]}`,
+                        content: defaultStories[type] || defaultStories['folk_tale']
+                    };
+                }
+
+                // If custom prompt is provided, prepend/modify title (simulating generation)
+                if (prompt) {
+                    selectedStory.title = `The ${prompt}`;
+                    selectedStory.content = `In the ${els.culture.value.replace('_', ' ')} tradition, there is a story about ${prompt}. ` + selectedStory.content;
+                }
+
+                // Populate UI
+                populateStory(selectedStory);
+                
+                // Show Card
+                els.emptyState.style.display = 'none';
+                els.storyCard.style.display = 'block';
+
+                // Generate Image
+                generateImage();
+
+                showToast("Story generated successfully!", "success");
+            }, 1500);
+        }
+
+        function populateStory(story) {
+            els.metaDisplay.textContent = `${els.culture.options[els.culture.selectedIndex].text} • ${els.storyType.options[els.storyType.selectedIndex].text}`;
+            els.titleDisplay.textContent = story.title;
+            els.storyText.value = story.content;
+            
+            // Reset Audio
+            stopAudio();
+        }
+
+        function generateImage(forceNew = false) {
+            // Show Loader
+            els.imgLoader.style.display = 'flex';
+
+            // Construct Seed for Picsum to get consistent "random" images
+            // Based on culture + random number + optional prompt
+            const seedBase = els.culture.value + (forceNew ? Date.now() : els.customPrompt.value || 'story');
+            const seed = encodeURIComponent(seedBase);
+            
+            // Image URL (Using Picsum for high quality placeholders)
+            // In a real app, this would be DALL-E or Pollinations AI
+            const imageUrl = `https://picsum.photos/seed/${seed}/800/400`;
+
+            const img = new Image();
+            img.onload = () => {
+                els.storyImage.src = imageUrl;
+                els.imgLoader.style.display = 'none';
+            };
+            img.src = imageUrl;
+        }
+
+        // --- Audio / Speech Synthesis ---
+
+        function toggleAudio() {
+            if (state.isPlaying) {
+                stopAudio();
+            } else {
+                playAudio();
+            }
+        }
+
+        function playAudio() {
+            if (!window.speechSynthesis) {
+                showToast("Your browser does not support Text-to-Speech.", "error");
+                return;
+            }
+
+            const text = els.storyText.value;
+            const lang = els.language.value;
+
+            stopAudio(); // Ensure no overlapping audio
+
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lang;
+            utterance.rate = 0.9; // Slightly slower for storytelling
+
+            utterance.onend = () => {
+                state.isPlaying = false;
+                updateAudioButtonState();
+            };
+
+            utterance.onerror = () => {
+                state.isPlaying = false;
+                updateAudioButtonState();
+                showToast("Error playing audio.", "error");
+            };
+
+            window.speechSynthesis.speak(utterance);
+            state.utterance = utterance;
+            state.isPlaying = true;
+            updateAudioButtonState();
+        }
+
+        function stopAudio() {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
+            state.isPlaying = false;
+            updateAudioButtonState();
+        }
+
+        function updateAudioButtonState() {
+            if (state.isPlaying) {
+                els.btnAudio.classList.add('active');
+                els.audioBtnText.textContent = "Pause";
+            } else {
+                els.btnAudio.classList.remove('active');
+                els.audioBtnText.textContent = "Play Narration";
+            }
+        }
+
+        // --- Export & Utilities ---
+
+        function saveStory() {
+            const title = els.titleDisplay.textContent;
+            const content = els.storyText.value;
+            const meta = els.metaDisplay.textContent;
+            const date = new Date().toLocaleString();
+
+            const fileContent = `Title: ${title}\nType: ${meta}\nDate: ${date}\n\n-------------------\n\n${content}`;
+            
+            const blob = new Blob([fileContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${title.replace(/\s+/g, '_')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showToast("Story saved to your device!", "success");
+        }
+
+        function copyStory() {
+            els.storyText.select();
+            navigator.clipboard.writeText(els.storyText.value).then(() => {
+                showToast("Story text copied to clipboard.", "success");
+            }).catch(() => {
+                showToast("Failed to copy text.", "error");
+            });
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            
+            // Icon based on type
+            let icon = '';
+            if (type === 'success') icon = '✅';
+            else if (type === 'error') icon = '❌';
+            else icon = 'ℹ️';
+
+            toast.innerHTML = `<span>${icon}</span> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+
+            // Remove after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Initial setup
+        updateSuggestions();
+
+    </script>
+</body>
+</html>
